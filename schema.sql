@@ -68,3 +68,52 @@ CREATE TABLE products (
 
 -- PostgreSQL does not index foreign keys automatically.
 CREATE INDEX idx_products_category_id ON products (category_id);
+
+-- ---------------------------------------------------------------------
+-- orders: placed by a user
+-- ---------------------------------------------------------------------
+CREATE TABLE orders (
+    id               SERIAL,
+    user_id          INTEGER       NOT NULL,
+    status           VARCHAR(20)   NOT NULL DEFAULT 'pending',
+    total_amount     NUMERIC(12,2) NOT NULL,
+    shipping_address TEXT          NOT NULL,
+    ordered_at       TIMESTAMP     NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_orders        PRIMARY KEY (id),
+    -- Order history must survive: a user with orders cannot be deleted.
+    CONSTRAINT fk_orders_user   FOREIGN KEY (user_id)
+        REFERENCES users (id) ON DELETE RESTRICT,
+    CONSTRAINT ck_orders_status CHECK (status IN
+        ('pending', 'paid', 'shipped', 'delivered', 'cancelled')),
+    CONSTRAINT ck_orders_total  CHECK (total_amount >= 0)
+);
+
+CREATE INDEX idx_orders_user_id ON orders (user_id);
+
+-- ---------------------------------------------------------------------
+-- order_items: junction table (many-to-many between orders and products)
+-- unit_price stores the price at purchase time, so history never changes.
+-- ---------------------------------------------------------------------
+CREATE TABLE order_items (
+    id         SERIAL,
+    order_id   INTEGER       NOT NULL,
+    product_id INTEGER       NOT NULL,
+    quantity   INTEGER       NOT NULL,
+    unit_price NUMERIC(12,2) NOT NULL,
+
+    CONSTRAINT pk_order_items         PRIMARY KEY (id),
+    -- Items disappear together with their order.
+    CONSTRAINT fk_order_items_order   FOREIGN KEY (order_id)
+        REFERENCES orders (id) ON DELETE CASCADE,
+    -- A product that was ever ordered cannot be deleted.
+    CONSTRAINT fk_order_items_product FOREIGN KEY (product_id)
+        REFERENCES products (id) ON DELETE RESTRICT,
+    -- The same product appears at most once per order (change quantity instead).
+    CONSTRAINT uq_order_items_order_product UNIQUE (order_id, product_id),
+    CONSTRAINT ck_order_items_quantity   CHECK (quantity > 0),
+    CONSTRAINT ck_order_items_unit_price CHECK (unit_price > 0)
+);
+
+CREATE INDEX idx_order_items_order_id   ON order_items (order_id);
+CREATE INDEX idx_order_items_product_id ON order_items (product_id);
