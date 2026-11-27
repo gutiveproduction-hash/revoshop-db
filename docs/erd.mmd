@@ -1,0 +1,46 @@
+erDiagram
+    users ||--o{ orders : "places"
+    categories |o--o{ products : "groups"
+    orders ||--|{ order_items : "contains"
+    products ||--o{ order_items : "appears in"
+
+    users {
+        serial id PK
+        varchar full_name
+        varchar email UK
+        varchar password_hash
+        varchar phone_number
+        boolean is_active
+        timestamp created_at
+    }
+    categories {
+        serial id PK
+        varchar name UK
+        text description
+        timestamp created_at
+    }
+    products {
+        serial id PK
+        integer category_id FK
+        varchar name
+        text description
+        numeric price
+        integer stock_quantity
+        boolean is_active
+        timestamp created_at
+    }
+    orders {
+        serial id PK
+        integer user_id FK
+        varchar status
+        numeric total_amount
+        text shipping_address
+        timestamp ordered_at
+    }
+    order_items {
+        serial id PK
+        integer order_id FK
+        integer product_id FK
+        integer quantity
+        numeric unit_price
+    }
