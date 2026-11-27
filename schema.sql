@@ -44,3 +44,27 @@ CREATE TABLE categories (
     CONSTRAINT pk_categories      PRIMARY KEY (id),
     CONSTRAINT uq_categories_name UNIQUE (name)
 );
+
+-- ---------------------------------------------------------------------
+-- products: store items, each linked to one category
+-- ---------------------------------------------------------------------
+CREATE TABLE products (
+    id             SERIAL,
+    category_id    INTEGER,
+    name           VARCHAR(200)  NOT NULL,
+    description    TEXT,
+    price          NUMERIC(12,2) NOT NULL,
+    stock_quantity INTEGER       NOT NULL DEFAULT 0,
+    is_active      BOOLEAN       NOT NULL DEFAULT TRUE,
+    created_at     TIMESTAMP     NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT pk_products          PRIMARY KEY (id),
+    -- A product may be kept (uncategorised) if its category is removed.
+    CONSTRAINT fk_products_category FOREIGN KEY (category_id)
+        REFERENCES categories (id) ON DELETE SET NULL,
+    CONSTRAINT ck_products_price    CHECK (price > 0),
+    CONSTRAINT ck_products_stock    CHECK (stock_quantity >= 0)
+);
+
+-- PostgreSQL does not index foreign keys automatically.
+CREATE INDEX idx_products_category_id ON products (category_id);
