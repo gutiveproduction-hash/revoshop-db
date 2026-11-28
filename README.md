@@ -12,7 +12,8 @@ revoshop-db/
 ├── queries.sql     # Example queries (WHERE + ORDER BY + LIMIT and more)
 ├── docs/
 │   ├── erd.png     # Schema diagram (ERD)
-│   └── erd.mmd     # Mermaid source of the diagram
+│   ├── erd.mmd     # Mermaid source of the diagram
+│   └── screenshots/  # PostgreSQL install + revoshop_db in pgAdmin
 ├── .gitignore
 └── README.md
 ```
@@ -37,7 +38,7 @@ revoshop-db/
 ### 1. Clone the repository
 
 ```bash
-git clone <your-repository-url>
+git clone https://github.com/gutiveproduction-hash/revoshop-db
 cd revoshop-db
 ```
 
@@ -70,6 +71,16 @@ psql -U postgres -d revoshop_db -c "\dt"
 ```
 
 Expected row counts (last query in `queries.sql`): users 8, categories 5, products 15, orders 10, order_items 18.
+
+## Screenshots
+
+PostgreSQL installed:
+
+![PostgreSQL installation](docs/screenshots/postgres-install.png)
+
+The `revoshop_db` database and its tables in pgAdmin:
+
+![revoshop_db in pgAdmin](docs/screenshots/pgadmin-revoshop-db.png)
 
 ## Design decisions
 
